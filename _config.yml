@@ -7,10 +7,10 @@
 
 # Site Settings
 locale                   : "en"
-title                    : "Site Title"
+title                    : ""
 title_separator          : "-"
-name                     : "Your Name"
-description              : "An amazing website."
+name                     : "Alex Ozdemir"
+description              : ""
 url                      : # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 gh_repo                  :
@@ -63,10 +63,10 @@ google_ad_slot           :
 
 # Site Author
 author:
-  name             : "Your Name"
+  name             : "Alex Ozdemir"
   avatar           : "bio-photo.jpg"
-  bio              : "I am an amazing person."
-  location         : "Somewhere"
+  bio              :
+  location         :
   email            :
   uri              :
   bitbucket        :
@@ -75,7 +75,7 @@ author:
   flickr           :
   facebook         :
   foursquare       :
-  github           :
+  github           : "alex-ozdemir"
   google_plus      :
   keybase          :
   instagram        :
@@ -206,3 +206,16 @@ compress_html:
   clippings: all
   ignore:
     envs: development
+
+defaults:
+  # _posts
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      author_profile: false
+      read_time: false
+      comments: false
+      share: false
+      related: false
