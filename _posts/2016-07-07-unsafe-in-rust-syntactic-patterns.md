@@ -348,6 +348,10 @@ If you're curious about some other statistics, such as:
    * How often do people ignore the linter and nest unsafe blocks?
    * How often do people include unneeded unsafe blocks?
    * What are these macros that introduce unsafe code, and  why?
+   * Do any macros produce unsafe operations without wrapping them in unsafe
+     blocks? How are these macros documented?
+   * How often are safe functions called from unsafe blocks? Internal?
+     External?
    * etc ...
 
 then I encourage you to take the next step. I'll even promise it will be fairly
