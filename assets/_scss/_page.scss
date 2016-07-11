@@ -37,10 +37,17 @@
 .page__title {
   margin-top: 0;
   line-height: 1;
+  font-size: $type-size-2;
 
   & + .page__meta {
     margin-top: -0.5em;
   }
+}
+
+.page_title:after {
+    content:' ';
+    display:block;
+    border:1px dotted $gray;
 }
 
 .page__lead {

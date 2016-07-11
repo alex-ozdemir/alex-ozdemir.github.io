@@ -316,17 +316,46 @@ The results were that out of 46553 unsafe contexts (blocks or functions),
 5484 contain only FFI and  14007 contain some FFI. That comes out to just under
 12% doing only FFI, which, while significant, is not a dominant trend.
 
-# How to Get Hacking
+# Some Conclusions
 
-While the above statistics are sort of neat, they're really just answers to a
-tiny minority of the questions we could be asking and answering. If you're
-curious about some other statistics (I.E. How often to people ignore the linter
-and nest unsafe blocks?), then I encourage you to take the next step. I'll even
-promise it will be fairly easy - you won't have to muck around interfacing with
-the compiler or waiting several hours to compile all the crates. You'll even be
-able to stick to the command line if you don't want to write Rust programs.
+So, in the end, what have we learned?
 
-Just follow [this link][quickstart] to a 15 minute quickstart on how to analyze
+   * A non-trivial number of crates contain unsafe contexts - about 30%.
+     Probably a few more contain unsafe `impl`'s.
+   * A non-trivial amount of code is unsafe - around 5% of blocks and functions.
+   * Macros introduce a surprising number of unsafe contexts and operations -
+     they account for on the order of 50% of operations / contexts, depending
+     on how you measure.
+   * Programmers domininantly just put unsafe blocks around operations that
+     require unsafe - they're not in the "large unsafe blocks" camp.
+   * Unsafe is used to do FFI, but not only FFI - about 10% of unsafe contexts
+     are only unsafe to do FFI.
+
+It's also worth noting that there are some holes in our analysis - we missed
+unsafe `impl`'s, our way of determining which code came from withing macros
+over-approximates, our heuristics for coding style could be a lot better, and
+many more. So these results aren't set in stone - just a good starting place.
+
+But of course, while interesting, this information is just the beginning of
+what could be collected. So, the relevant question is:
+
+# How can I Get Hacking?
+
+I'm glad you asked!
+
+If you're curious about some other statistics, such as:
+
+   * How often do people ignore the linter and nest unsafe blocks?
+   * How often do people include unneeded unsafe blocks?
+   * What are these macros that introduce unsafe code, and  why?
+   * etc ...
+
+then I encourage you to take the next step. I'll even promise it will be fairly
+easy - you won't have to muck around interfacing with the compiler or waiting
+several hours to compile all the crates. You'll even be able to stick to the
+command line if you don't want to write Rust programs.
+
+Follow [this link][quickstart] to a 15 minute quickstart on how to analyze
 UnsafeASTs, and keep me posted on what you find out!
 
 [rust-lang]: https://www.rust-lang.org
