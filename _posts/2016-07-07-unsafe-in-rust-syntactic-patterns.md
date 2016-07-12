@@ -8,6 +8,17 @@ categories: rust unsafe
 
 {::options toc_levels="1,2" /}
 
+# Overview
+{:.no_toc}
+
+Despite the fundamental role `unsafe` plays in Rust, we have relatively little
+understanding of how it is being used in real codebases. As the community
+decides what the exact semantics of `unsafe` should be, it becomes increasingly
+important to have this understanding in order to avoid accidentally diverging
+from the expectations of library writers. This post takes a first step in that
+direction by laying the basis for syntactic analyses of `unsafe` in Rust code
+hosted on crates.io.
+
 # Contents
 {:.no_toc}
 
@@ -30,9 +41,10 @@ heart is a statically verified system of memory management - an incarnation of
 the [RAII pattern][raii] baked into the type system itself. The compiler
 enforces a strict system of memory ownership which allows it to automatically
 and statically determine when memory should be allocated and deallocated.
-The ownership system take in combination with a few other language features
-render Rust a _memory safe language_, meaning that it is impossible to read
-memory your program does not currently have access to.
+The ownership system (in combination with a few other language features)
+renders Rust immune to a wide variety of memory-related bugs, such as use-null
+pointer dereferences, use after free, buffer overflow, and reading undefined
+values.
 
 The problem is, while the memory management system enforced in Rust allow
 programmers to write a broad class of programs, it don't allow programmers to
@@ -76,21 +88,21 @@ bit-level conversion.
 
 So in some sense, `unsafe` is part of the secret sauce of Rust - it allows
 programmers to do all the wild memory-unsafe things they need to do to
-implement awesome data structures, but also requires them to declare that
-they're doing so, and encourages them to bundle up their unsafe code into safe
-abstractions.
+implement awesome data structures and interact with the system, but also
+requires them to declare that they're doing so, and encourages them to bundle
+up their unsafe code into safe abstractions.
 
 The thing is, sometimes it's difficult to encapsulate unsafe code inside a safe
 abstraction. In fact, sometimes its even unclear what that actually means. In a
 colloquial sense it means that the Rust type system (including the ownership
 model) is being respected, but this is still difficult to define and even more
-difficult to verify. In fact, there has lately been [a lot][tootsie] [of
-discussion][tootsie-discuss] around what the formal model for unsafe should be,
+difficult to verify. In fact, there has lately been [a lot][tootsie] of
+[discussion][tootsie-discuss] around what the formal model for unsafe should be,
 without a clear consensus.
 
-In light of the theoretical ambiguities, it's worth investigating how unsafe
-code is currently being used by real-world codebases, that is: "_How_ and _why_
-do Rust programs use unsafe code?"
+In light of the more niche or theoretical ambiguities, it's worth investigating
+how unsafe code is currently being used by real-world codebases, that is:
+"_How_ and _why_ do Rust programs use unsafe code?"
 
 # The Strategy
 
@@ -105,17 +117,17 @@ few starting questions:
 
 The thing is - while we can start by distilling our guiding question ("_How_
 and _why_ do Rust programs use unsafe code?") into specific smaller questions,
-there are a million ways we could do so - our list was by no means exhaustive.
+there are a million ways we could do so - our list is by no means exhaustive.
 
 Furthermore, answering questions like these isn't the easiest thing in
-the world. To start with, in order to gain access to syntactic or semantic
-information about a Rust program you've got to lean on the analysis done by the
-compiler, requiring you to write a compiler plugin, using the compiler's [driver
-system][compiler-calls]. Then you've got to sift through the compiler's data
-structures in order to extract the information you're curious about. If you're
-interested in more than just the AST (perhaps you want type information, so you
-can tell when pointers are being dereferenced), then you'll have to wait until
-after the compiler's analysis passes have completed.
+the world. To start with, the easiest way to gain access to syntactic or
+semantic information about a Rust program is to lean on the analysis done by
+the compiler, requiring you to write a compiler plugin, using the compiler's
+[driver system][compiler-calls]. Then you've got to sift through the compiler's
+data structures in order to extract the information you're curious about. If
+you're interested in more than just the AST (perhaps you want type information,
+so you can tell when pointers are being dereferenced), then you'll have to wait
+until after the compiler's analysis passes have completed.
 
 So it seems like we're in for a rough time - to get to our guiding question it
 seems we need to collect a potentially large set of statistics, and aggregating
@@ -130,7 +142,7 @@ So let's cut out this redundancy! Rather than running a new plugin for each
 statistic, I decided to take the compiler's data structures (specifically the
 HIR) and reduce it to an Unsafe Abstract Syntax Tree (or UAST). This tree
 encodes the syntactic structure of how `unsafe` is declared and used in Rust
-programs.  Specifically, it describes the relationships between containers
+programs.  Specifically, it describes the relationships between contexts
 (blocks and functions) that might declare unsafe and operations that use it
 (unsafe function calls, pointer dereferences, interaction with mutable statics,
 and inline assembly). It also includes information about block sizes, statement
@@ -162,37 +174,57 @@ command line utilities such as [`jq`][jq].
 
 As to how many crates use unsafe, out of 3,638 crates analyzed, 1,048 declared at
 least one function or block unsafe. Thats just about 29%, although note that
-we're missing the crate which implement unsafe traits (such as `Send` or
+we're missing the crates which implement unsafe traits (such as `Send` or
 `Sync`) without any unsafe functions or blocks. To get how often crates use
-unsafe, take a look at this Cumulative Distribution Graph:
+unsafe, take a look at this Cumulative Distribution:
 
 ![CDF for Unsafe Declaration Counts in Crates][unsafe-decl-in-crates]
 
-This plot shows you, for a given number of `unsafe` functions + blocks, what
-percent of crates use that many or fewer. As an example, the line crosses 80%
-at ~3 funcations + blocks, so 80% of crates declare 3 or fewer `unsafe`
-functions and blocks (also notice that the horizontal axis is logarithmic).
+This plot shows you, for a given number of `unsafe` context percent of crates
+use that many or fewer. As an example, the line crosses 80% at ~3 contexts, so
+80% of crates declare 3 or fewer `unsafe` contexts (also notice that the
+horizontal axis is logarithmic).
+
+We all had our own ideas of how often Rust code uses `unsafe`, but I at least
+found it surprising that around 30% of crates contained unsafe code - I would
+have thought it would be fewer. The classic idea is that we use unsafe code to
+build safe abstractions that we then reuse again and again. Is this reuse
+not happening, or are there just a lot of abstractions that need to be
+internally unsafe? An interesting follow-up would be to look at the safe and
+unsafe crates in the context of the crates.io dependency graph. Do crates that
+use unsafe occupy "fundamental"[^fundamental] positions in this graph?
+
+[^fundamental]:
+    By fundamental, I mean that lots of things depend of them, and/or they
+    don't depend on much.
 
 ## How Much `unsafe` Is There, And Where Does It Come From?
-We can also ask questions about how much unsafe there is, in terms of blocks,
-functions, and uses.
+We can also re-investigate how much unsafe code there is from the perspectives
+of unsafe blocks, functions, and uses, rather than just crates.
 
 ### Blocks and Functions: Overview
 
-{: .borders}
-| Container Type |  Total |    Safe | Unsafe | % Unsafe |
+If we count the number of safe and unsafe contexts we see the following:
+
+| Context   Type |  Total |    Safe | Unsafe | % Unsafe |
 |:-------------- |  ----- |    ---- | ------ | -------- |
 | Function       | 269,070 | 258,088  |  10,982 |      4.1 |
 | Block          | 557,118 | 521,547  |  35,571 |      6.4 |
 
+So on the order of 5% of both functions and blocks are unsafe. This sort of
+helps us think more about how the safe/unsafe code divide interacts with crate
+boundaries. If ~30% of crates use unsafe, but only ~5% of code is unsafe, it
+seems that either crates with unsafe code are quite short, or crates with
+unsafe code also have a lot of safe code. One could do a followup analysis
+looking at what fraction of code within a crate is unsafe.
+
 ### Unsafe Uses by Type and Macro Origin {#use-types}
 
-When looking into the different types of dereferences that occured I noticed
-that a large number of uses occured inside code produced by macro expansions,
-so I displayed the usage counts stratified by not only usage type, but also
-what type of macro they originated in (if any).
+When looking into the different types of unsafe operations that occurred I
+noticed that a large number of unsafe operations occurred inside code produced
+by macro expansions, so I displayed the usage counts stratified by not only
+usage type, but also what type of macro they originated in (if any).
 
-{: .borders}
 | Source |Deref ptr  | Call unsafe Rust function  | Call FFI  | Use `static mut`  | Use inline ASM  | All uses |
 |---|---|---|---|---|---|---|
 |  `derive` macro  |0 |12,058 |0 |0 |0 |12,058 |
@@ -201,12 +233,55 @@ what type of macro they originated in (if any).
 |  Not a macro  |4,496 |18,916 |13,061 |1,264 |0 |37,737 |
 |  All sources  |9,029 |48,993 |15,309 |10,162 |80 |83,573 |
 
+Looking at this table there are a few things to note:
+
+First, by `derive` macro, I mean that the code was generated by the `derive`
+attribute (TIL that the compiler makes `derive` work using procedural macros,
+and these sometimes use unsafe code to get LLVM to optimize it nicely).
+
+Second, A _lot_ of unsafe operations seem to be generated by macros, especially
+external ones. This is an interesting trend, but its also important to
+understand some of the methodology behind the UAST here. Specifically, the UAST
+determines whether an operation or context is generated by a macro by asking
+the compiler whether that object's span was generated by a macro (and if so,
+what type)[^derive]. This information actually ends up being fairly course - as
+best I can tell it just records whether that token ever went through a macro
+expansion. This means that in a program like this:
+
+```rust
+fn main() {
+   let i = 5;
+   let p: *const i32 = &i;
+   println!("{}", unsafe { *p } );
+}
+```
+
+the `*p` expression would be registered as "originating inside an external
+macro", even though the programmer typed it themself. Our analysis here could
+be much better, and it would probably be worth improving it. If nothing else
+it'd be interesting to see which macros are doing all this unsafe code
+generation.
+
+This is especially important because historically macro expansion has been a
+bit more challenging to handle than function calls, and has caused some
+un-intuitive behavior. Rust has the concept of an "unsafe function" - should it
+also have the concept of an "unsafe macro"?
+
+My impulse is to say there is no explicit need for them, because they already
+exist _de facto_: if a macro performs unsafe operations then the compiler will
+require a use to use an `unsafe` block around it. That being said, it's
+something worth thinking about.
+
+[^derive]:
+    Furthermore, the compiler doesn't specifically track what is generated
+    using `derive` - that information is determined using a [blatant
+    hack][derive-hack].
+
 ### Blocks by Safety and Macro Origin
 
 I applied the same reasoning to blocks, looking at the sources of safe and
 unsafe blocks.
 
-{: .borders}
 | Block Source | Unsafe  | Safe  | All |
 |---|---|---|---|
 |  `derive` macro  |0 |83,488 |83,488 |
@@ -214,7 +289,6 @@ unsafe blocks.
 |  Local macro  |4,751 |45,923 |50,674 |
 |  Not a macro  |23,237 |202,497 |225,734 |
 |  All sources  |35,571 |521,547 |557,118 |
-| Source | Unsafe  | Safe  | All |
 
 One point of interest in this table is the blocks generated by `derive`
 procedural macros. Interestingly, they're all flagged as safe, depsite the fact
@@ -267,8 +341,8 @@ large unsafe blocks make this obligation more apparent.
 Regardless of which way is best, I was curious which style was more common, so
 I looked at two metrics:
 
-   1. _Unsafe Block Relative Size_: How much of their parent block/function do
-      unsafe blocks fill (where blocks are sized by the number of
+   1. _Unsafe Block Relative Size_: How much of their parent function do unsafe
+      blocks fill (where blocks and functions are sized by the number of
       statements/final expressions in them and all their child blocks)?
    2. _Unsafe Block Requirement_: What amount of code (in terms of
       statements/final expressions) in an unsafe block actually requires that
@@ -302,19 +376,94 @@ The graph shows that 90% of unsafe blocks are 'used' by every statement or
 final expression in their body, so it seems clear that small unsafe blocks are
 dramatically more common than large ones.
 
+That being said, the question of style is not entirely answered: perhaps unsafe
+blocks are most commonly used in one-line functions: this would cause them to
+simultaneously minimally wrap the unsafe operations and maximally fill their
+parent function. To answer this question I made a final plot:
+
+![Unsafe Blocks: Requirements and Relative Sizes][unsafe-blocks-rel-size-required]
+
+Notice that while concentration is highest in the upper right, it is higher in
+the upper left than the lower right, indicating that our earlier analysis is
+correct: Programmers tend to use small unsafe blocks rather than large ones.
+Nevertheless, the strong presence on both the upper and right sides indicates
+that both styles are reasonably popular. Taking the ratio of relative size to
+requirement is also consistent with this analysis:
+
+![Unsafe Blocks: Relative Size / Requirement][unsafe-blocks-rel-size-req]
+
+Notice first that most of the time the ratio is one. Assuming this means that
+both values are one (which is consistent with the prior plot), this indicates
+that most of the time the two strategies agree - unsafe blocks are
+simultaneously minimally and maximally sized. Also though, notice low ratios
+(meaning larger requirement than relative size) are more common than high
+ratios, so the "small unsafe block" strategy seems somewhat more common.
+
+Of course, we could probably do better still - the ratio may not be exactly
+what we want here.
+
 ## How Important Is FFI In `unsafe`?
 
 If you're familiar with Rust, one of the important things you would know about
 unsafe functions is that all FFI functions (which right now include C functions
 and system calls) are considered unsafe. One might wonder, "Does FFI make up a
 substantial portion of unsafe code?" This is somewhat answered by the [above
-table][use-types], but I decided to take it one step further and look at how
+table](#use-types), but I decided to take it one step further and look at how
 many unsafe blocks/functions _only_ perform FFI, and do no other unsafe
 operations.
 
-The results were that out of 46553 unsafe contexts (blocks or functions), 
-5484 contain only FFI and  14007 contain some FFI. That comes out to just under
+The results were that out of 46,553 unsafe contexts (blocks or functions), 
+5,484 contain only FFI and  14,007 contain some FFI. That comes out to just under
 12% doing only FFI, which, while significant, is not a dominant trend.
+
+## Unsafe in Closures?
+
+Unsafe can also interact with closures in an interesting way. For example,
+consider this rust function:
+
+```rust
+fn mk_derefer() -> Box<Fn(*const i32) -> i32> {
+    unsafe { Box::new(|p: *const i32| *p) }
+}
+```
+
+This function produces a closure that does a scary thing - dereferencing an
+unknown pointer. Yet, Rust provides no way for `mk_derefer` to precisely
+indicate that the function it returns is unsafe. The best thing to do would be
+to mark `mk_derefer` as unsafe, which sort of gets at the idea, but not quite,
+because running `mk_derefer` will _never_ produce some violation of memory or
+type safety, but using its return value may.
+
+At any rate, because this situation is created (on some level) by doing unsafe
+operations in closures, we might be curious how common it is to do so. Some
+simple numbers:
+
+   1. There are 783 closures with unsafe operations in them.
+   1. There are 188 crates which have such closures.
+   1. There are 328 closures with unsafe operations in them which are not inside
+      an unsafe block which is in the closure (the unsafe context encloses the
+      closure too).
+   1. There are 100 crates which have such closures.
+   1. There are 35,868 closures in all.
+
+So while closures which do unsafe operations are by no means dominant, they do
+exist. However, they may not be problematic as our toy example was. Consider
+the first closure turned up by the third analysis above (taken from Chris
+Morgan's [anymap][anymap]):
+
+```rust
+pub fn insert<T: IntoBox<A>>(&mut self, value: T) -> Option<T> {
+    unsafe {
+        self.raw.insert(TypeId::of::<T>(), value.into_box())
+            .map(|any| *any.downcast_unchecked::<T>())          // <-- This one
+    }
+}
+```
+
+Clearly this is fine - the closure here never escapes, it is just part of
+typical `Option` interactions. This example reminds us though that detecting
+problems like `mk_derefer` is a complex issue - a dataflow question rather than
+just a syntactic one.
 
 # Some Conclusions
 
@@ -330,8 +479,10 @@ So, in the end, what have we learned?
      require unsafe - they're not in the "large unsafe blocks" camp.
    * Unsafe is used to do FFI, but not only FFI - about 10% of unsafe contexts
      are only unsafe to do FFI.
+   * Closures may be a tough case for unsafe declarations, but we need better
+     analysis to figure out if any issues arrive in the real world.
 
-It's also worth noting that there are some holes in our analysis - we missed
+It's also worth repeating that there are some holes in our analysis - we missed
 unsafe `impl`'s, our way of determining which code came from withing macros
 over-approximates, our heuristics for coding style could be a lot better, and
 many more. So these results aren't set in stone - just a good starting place.
@@ -352,7 +503,8 @@ If you're curious about some other statistics, such as:
      blocks? How are these macros documented?
    * How often are safe functions called from unsafe blocks? Internal?
      External?
-   * etc ...
+   * ... or any of the other followup questions above ...
+   * ... or any of your own questions ...
 
 then I encourage you to take the next step. I'll even promise it will be fairly
 easy - you won't have to muck around interfacing with the compiler or waiting
@@ -372,6 +524,10 @@ UnsafeASTs, and keep me posted on what you find out!
 [compiler-calls]: http://manishearth.github.io/rust-internals-docs/rustc_driver/index.html
 [jq]: https://stedolan.github.io/jq/
 [cargo-unsafe]: https://github.com/rust-lang/cargo/blob/07c1d9900de40c59b898d08d64273447560ffbe3/tests/death.rs#L17
+[derive-hack]: https://github.com/alex-ozdemir/unsafe-ast/blob/master/src/rust/emit-ast/unsafe_ast.rs#L269
+[quickstart]: https://github.com/alex-ozdemir/unsafe-ast#quickstart
+[anymap]: https://github.com/chris-morgan/anymap/blob/master/src/lib.rs#L163
+
 
 [unsafe-decl-in-crates]: /images/2016-07-07-unsafe-declarations-by-crate.png
 {: .img-large .align-center }
@@ -381,4 +537,7 @@ UnsafeASTs, and keep me posted on what you find out!
 {: .img-small .align-center }
 [unsafe-blocks-required]: /images/2016-07-08-unsafe-blocks-required-fraction.png
 {: .img-small .align-center }
-[quickstart]: https://github.com/alex-ozdemir/unsafe-ast#quickstart
+[unsafe-blocks-rel-size-required]: /images/2016-07-11-unsafe-blocks-rel-size-and-requirements.png
+{: .img-small .align-center }
+[unsafe-blocks-rel-size-req]: /images/2016-07-11-unsafe-blocks-rel-size-req-ratio.png
+{: .img-small .align-center }
