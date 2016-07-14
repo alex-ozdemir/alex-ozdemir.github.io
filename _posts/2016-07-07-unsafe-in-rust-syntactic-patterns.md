@@ -427,12 +427,12 @@ fn mk_derefer() -> Box<Fn(*const i32) -> i32> {
 }
 ```
 
-This function produces a closure that does a scary thing - dereferencing an
+This function produces a closure that does an unsafe thing - dereferencing an
 unknown pointer. Yet, Rust provides no way for `mk_derefer` to precisely
-indicate that the function it returns is unsafe. The best thing to do would be
+indicate that the closure it returns is unsafe. The best thing to do would be
 to mark `mk_derefer` as unsafe, which sort of gets at the idea, but not quite,
 because running `mk_derefer` will _never_ produce some violation of memory or
-type safety, but using its return value may.
+type safety, but using teh resulting closure may.
 
 At any rate, because this situation is created (on some level) by doing unsafe
 operations in closures, we might be curious how common it is to do so. Some
