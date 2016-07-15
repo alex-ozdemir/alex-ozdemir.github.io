@@ -514,6 +514,12 @@ command line if you don't want to write Rust programs.
 Follow [this link][quickstart] to a 15 minute quickstart on how to analyze
 UnsafeASTs, and keep me posted on what you find out!
 
+# Credits
+{:.no_toc}
+
+I by no means did this alone - I'm indebted to Steve Chong, Lucas Waye, and
+Niko Matsakis for their ideas, inspiration, direction, and questions.
+
 [rust-lang]: https://www.rust-lang.org
 [raii]: https://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization
 [too-many-lists]: http://cglab.ca/~abeinges/blah/too-many-lists/book/
