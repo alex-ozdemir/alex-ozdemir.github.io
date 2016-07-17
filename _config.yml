@@ -11,7 +11,7 @@ title                    : ""
 title_separator          : "-"
 name                     : "Alex Ozdemir"
 description              : ""
-url                      : "https://alex-ozdemir.github.io"
+url                      : "" # "https://alex-ozdemir.github.io"
     # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 gh_repo                  :
@@ -66,7 +66,7 @@ google_ad_slot           :
 # Site Author
 author:
   name             : "Alex Ozdemir"
-  avatar           : "me.jpg"
+  avatar           : "san-clemente.jpg"
   bio              :
   location         :
   email            :
