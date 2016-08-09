@@ -3,6 +3,7 @@
 title:  "Unsafe in Rust: Syntactic Patterns"
 date:   2016-07-11 15:46:25 -0700
 categories: rust unsafe
+published: true
 
 ---
 
