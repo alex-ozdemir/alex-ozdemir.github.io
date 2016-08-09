@@ -8,10 +8,11 @@ categories: rust unsafe
 
 {::options toc_levels="1,2" /}
 
-After the work I did analyzing syntactic patterns that `unsafe` is found in, I
-spent the rest of my summer working on a tool to detect a particular way that
-`unsafe` may be misused. In this post and the next I'd like to explain what
-motivated this analysis, and provide a brief overview of how it works.
+After the work I did [analyzing syntactic patterns that `unsafe` is found
+in][last], I spent the rest of my summer working on a tool to detect a
+particular way that `unsafe` may be misused. In this post and the next I'd like
+to explain what motivated this analysis, and provide a brief overview of how it
+works.
 
 # Overview
 {:.no_toc}
@@ -563,3 +564,4 @@ of running the analysis on various Rust codebases.
 [get-unchecked]: https://doc.rust-lang.org/std/primitive.slice.html#method.get_unchecked
 [dataflow-class-steve]: http://www.seas.harvard.edu/courses/cs252/2015fa/schedule.html
 [dataflow-slides-steve]: http://www.seas.harvard.edu/courses/cs252/2015fa/lectures/Lec02-Dataflow.pdf
+[last]: /rust/unsafe/unsafe-in-rust-syntactic-patterns/
