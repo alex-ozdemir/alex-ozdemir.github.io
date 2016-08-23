@@ -7,7 +7,7 @@
 
 # Site Settings
 locale                   : "en"
-title                    : ""
+title                    : "" # "Between Media"
 title_separator          : "-"
 name                     : "Alex Ozdemir"
 description              : ""

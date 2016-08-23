@@ -21,7 +21,7 @@ This post begins with a review how `unsafe` facilitates the denotation of
 abstraction boundaries, and proposes a set of rules for how these abstractions
 should work: the _Abstraction Safety Contract_. We then discuss a particular
 method by which the Abstraction Safety contract can be violated: Public Escape.
-We conclude by beginning to design a static analysis which can reason about
+We conclude by beginning to design a static analysis that can reason about
 Public Escape.
 
 # Contents
@@ -34,7 +34,7 @@ Public Escape.
 
 Early this summer Niko Matsakis [wrote][unsafe-abstractions-niko]
 [about][unsafe-rules-niko] how Rust's `unsafe` feature should be seen as a tool
-to declare and interact with abstraction boundaries which have more requirements
+to declare and interact with abstraction boundaries that have more requirements
 than Rust's type system allows them express. This perspective sheds light on the
 meaning of both unsafe blocks and unsafe functions, so I'll summarize the key
 takeaways here while introducing a new term which will help us talk about them:
@@ -70,7 +70,7 @@ performing, I know their safety conditions, and I'll make sure those conditions
 are met". In this way, unsafe blocks take responsibility for the memory safety
 of the code that they contain.
 
-An example of an unsafe block which guarantees that `get_unchecked`'s safety
+An example of an unsafe block that guarantees that `get_unchecked`'s safety
 conditions are being met is this one:
 
 ```rust
@@ -126,7 +126,7 @@ pub fn deref(ptr: *const i32) -> i32 {
 }
 ```
 
-In Example A, `deref` is a public, safe function which takes an arbitrary
+In Example A, `deref` is a public, safe function that takes an arbitrary
 pointer an dereferences it. It does so using an unsafe block, and we can reason
 about whether this block is being used in a way that conforms to the Abstraction
 Safety Contract.
@@ -138,7 +138,7 @@ points to valid data that this function can read, and whether this condition is
 met depends on the state of the program when the unsafe block runs (in
 particular on the address stored in `ptr`). To understand this state, we must
 reason about the code that executes before the block: the parts of the block's
-enclosing abstraction which establish the program state prior to the block's
+enclosing abstraction that establish the program state prior to the block's
 execution.
 
 In example A, since `deref` is a public function, it is a public interface unto
@@ -170,7 +170,7 @@ the Abstraction Safety Contract[^techn].
 
 [^techn]:
     Technically we might say that the unsafe block inside of `deref` is
-    violating the ASC, but since it is `deref` which sets up the state of the
+    violating the ASC, but since it is `deref` that sets up the state of the
     program when the unsafe block runs, it's convenient to "hold `deref`
     accountable".
 
@@ -266,7 +266,7 @@ impl VGA {
 ```
 
 At first glance, the `write_first` function seems problematic for the same
-reason that `deref` was in Examples A and B: it is a public, safe function which
+reason that `deref` was in Examples A and B: it is a public, safe function that
 dereferences some part of its input (specifically `self.vga_mem_start`).
 However, this case is also somewhat different --- `write_first` isn't just
 dereferencing _any_ input, its dereferencing a private field of `VGA`. Since the
@@ -292,7 +292,7 @@ a lack of escape does not prove that the ASC is upheld.**
 
 Hopefully by now you have some intuition for what public escape is, and have a
 good understanding of why it's problematic for safety conditions to escape. In
-the next section we're going to start designing an automatic tool which can
+the next section we're going to start designing an automatic tool that can
 reason about public escape, which should help further solidify these ideas.
 
 # Automating the Analysis
@@ -456,7 +456,7 @@ pub fn deref(ptr: *const i32) -> i32 {
 
 In using a dataflow analysis to understand whether any safety conditions escape
 the public function `deref`, we're forced to do an inter-procedural analysis: an
-analysis which can reason about the significance of one function calling
+analysis that can reason about the significance of one function calling
 another. Let's step through how analysis might do this, starting with the end of
 `deref`.
 
