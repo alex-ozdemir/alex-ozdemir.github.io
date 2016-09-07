@@ -229,7 +229,7 @@ pub fn identity(x: i32) -> i32 {
 }
 ```
 
-In this function a raw pointer is dereference, creating a safety condition: "`p`
+In this function a raw pointer is dereferenced, creating a safety condition: "`p`
 must be dereferenceable". However, immediately above `p` is set to the address
 of a local variable. For this reason, the safety condition does not escape the
 function, and furthermore we'd agree that while `identity` is rather bizarre, it
@@ -269,7 +269,7 @@ At first glance, the `write_first` function seems problematic for the same
 reason that `deref` was in Examples A and B: it is a public, safe function that
 dereferences some part of its input (specifically `self.vga_mem_start`).
 However, this case is also somewhat different --- `write_first` isn't just
-dereferencing _any_ input, its dereferencing a private field of `VGA`. Since the
+dereferencing _any_ input, it's dereferencing a private field of `VGA`. Since the
 field is private, the fact that the safety condition "`self.vga_mem_start` holds
 a write-able address" escapes _a public function_ doesn't immediately mean that
 the safety condition has escaped _the public interface_.
@@ -280,15 +280,15 @@ field.  If it turns out that the only such code is in `VGA::new()`, which puts a
 magic address into the field, then we know that this safety condition doesn't
 escape the public interface.
 
-Of course, we haven't verify that the safety condition is actually met ---  we
+Of course, we haven't verified that the safety condition is actually met ---  we
 don't know whether the address `0xb8000` can actually be written to, and we
 definitely don't know that the address gives the correct location of the VGA
-Buffer. All we can say is that no verification conditions escape the public
-interface of `VGA`.
+Buffer. All we can say is that no safety conditions escape the public interface
+of `VGA`.
 
-This asymmetry is important: **If verification conditions escape a public
-interface then there must be a violation of the Abstraction Safety Contract, but
-a lack of escape does not prove that the ASC is upheld.**
+This asymmetry is important: **If safety conditions escape a public interface
+then there must be a violation of the Abstraction Safety Contract, but a lack of
+escape does not prove that the ASC is upheld.**
 
 Hopefully by now you have some intuition for what public escape is, and have a
 good understanding of why it's problematic for safety conditions to escape. In
@@ -305,7 +305,7 @@ enough to understand this post.
 
 ## Dataflow Analysis: An Introduction
 
-I find examples helpful in building intuition for new ideas, so lets begin with
+I find examples helpful in building intuition for new ideas, so let's begin with
 a question that dataflow analysis could be used to answer: "Which variables in a
 function are equal to 5?". Consider this function:
 
@@ -366,7 +366,7 @@ fn my_func(flag: bool) {
 Now, knowing whether an integer variable is 5 may not seem particularly useful,
 but this analysis could be generalized to do constant evaluation. In particular,
 imagine if we could determine whether boolean variables were true or false: this
-could enable a compiler to determine which arm of an if/else gets executed an
+could enable a compiler to determine which arm of an if/else gets executed and
 omit the unused arm!
 
 Dataflow analyses (and similar static analyses) are also used for many other
@@ -462,9 +462,9 @@ another. Let's step through how analysis might do this, starting with the end of
 
 The last operation that `deref` performs is calling `deref_helper` on `ptr2`.
 Our analysis would thus have to analyze `deref_helper` at that point, and
-determine any safety conditions created by calling it. That analysis would tell
-conclude that the first argument to `deref_helper` must be deref-able, a condition
-that would be brought back into `deref`'s analysis:
+determine any safety conditions created by calling it. That analysis would
+conclude that the first argument to `deref_helper` must be deref-able, a
+condition that would be brought back into `deref`'s analysis:
 
 ```rust
 pub fn deref(ptr: *const i32) -> i32 {
@@ -482,7 +482,7 @@ The analysis would then encounter the call to `identity`, and assignment of
 then be analyzed, just as `deref_helper` was, but we have to be careful - we
 can't just analyze `identity` in isolation - we have to analyze it with some
 extra information from the site where it is called (in this case, the knowledge
-that `identitiy`'s return value must be dereferenceable). This extra information
+that `identity`'s return value must be dereferenceable). This extra information
 is the _context_ in which `identity` in analyzed, and by handling contexts our
 analysis models how data can enter a function through its arguments and leave
 through its return value[^escape].
@@ -492,7 +492,7 @@ through its return value[^escape].
     pointed at by its arguments. Consider `fn swap<T>(a: &mut T, b: &mut T);`.
     Nevertheless, thinking about the return value is a good way to start.
 
-When `identity` is analyzed in the context in which it's return value must be
+When `identity` is analyzed in the context in which its return value must be
 dereferenceable, the result is that its first argument must also be
 dereferenceable. Bringing this conclusion back into our analysis of `deref` and
 finishing that analysis yields the following:
@@ -538,6 +538,9 @@ While a condition "`p` must be dereferenceable" is still generated, that
 condition is ultimately killed[^term] by the assignment `let p = &...`. For that
 reason the analysis would conclude that this function features no public escape,
 which is correct.
+
+[^term]:
+    'Killed' is the technical term for removing facts from a datflow.
 
 # Next Time: Example D and Beyond
 
