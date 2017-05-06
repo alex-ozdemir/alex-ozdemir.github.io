@@ -4,6 +4,7 @@ title: "Unsafe in Rust: The Abstraction Safety Contract and Public Escape"
 date: 2016-08-07 09:46:25 -0700
 categories: rust unsafe
 published: true
+excerpt: Defining and detecting some ways `unsafe` is misused
 
 ---
 
