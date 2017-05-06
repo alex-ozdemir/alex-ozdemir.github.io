@@ -3,6 +3,7 @@
 title: "Generating Personal Statements"
 date: 2016-12-29 16:27:25 -0800
 categories: linguistics generation
+published: true
 
 ---
 
