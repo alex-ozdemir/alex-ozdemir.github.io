@@ -6,8 +6,6 @@ date: 2017-04-17 15:26:40 -0800
 
 ---
 
-# Alex Ozdemir
-
 ![A picture of me][portrait]
 
 I'm a future grad student looking to investigate computation as a medium for
@@ -28,5 +26,5 @@ Rust), and I'll be spending the next one at Coursera.
 
 In the Fall of 2018 I'll begin my Phd. in Computer Science at Stanford.
 
-[portrait]: /images/portrait-photo.png
+[portrait]: /images/portrait-photo.jpg
 {: .align-center .img-medium}
