@@ -289,8 +289,8 @@ Construct?
 
 I suspect the answer is no. I didn't omit them on accident, or because I was
 lazy. I omitted them because all the constructions I've seen (save
-Mohr-Macheroni) don't use them. It seems that iteration and branching have no
-place in a Mohr-Macheroni-free world, suggesting that the classical geometric
+Mohr-Mascheroni) don't use them. It seems that iteration and branching have no
+place in a Mohr-Mascheroni-free world, suggesting that the classical geometric
 tools (a compass and straightedge) can do with only linear control flow what the
 compass requires branching & iteration to do. Essentially, the world might look
 like this:
