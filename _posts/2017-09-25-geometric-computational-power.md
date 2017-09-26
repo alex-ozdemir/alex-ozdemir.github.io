@@ -3,7 +3,7 @@
 title: "Revisiting the Mohr-Mascheroni Theorem"
 date: 2017-09-25
 categories: math geometry
-excerpt: "A compass is not as powerful as a compass & straightedge after all"
+excerpt: "A compass is not necessarily as powerful as a compass & straightedge"
 published: true
 
 ---
@@ -151,15 +151,15 @@ point arbitrarily far away from its starting points.
 
 Now consider the following points $$ A = (0, 1), B = (1, 1), $$ and $$ C = (0,
 0)$$ Also consider the sequence of points $$ D_n = \left(1, \frac{1}{n}\right)
-$$. Notice that the intersection of $$ AB $$ and $$ CD_n $$ is $$ (1, n) $$.
+$$. Notice that the intersection of $$ AB $$ and $$ CD_n $$ is $$ (n, 1) $$.
 
 Thus when `con` correctly finds the intersection of $$ AB $$ and $$ CD_n $$ that
-intersection is at $$ (0, n) $$, which is further than $$n$$ from $$A$$. Also notice
-that the maximum distance between any of $$ \{A, B, C, D_n\}$$ is always less
-than $$ 2 $$, so `con` can never find (or return) a point further than $$2N$$
-from $$ A $$. But $$ n $$ can be any integer, in particular, $$ 2N $$, so then
-`con` would have to return a point further than $$ 2N $$ from the $$ A $$, a
-contradiction.
+intersection is at $$ (n, 1) $$, which is further than $$n$$ from $$C$$. Also
+notice that the maximum distance between any of $$ \{A, B, C, D_n\}$$ is always
+less than $$ 2 $$, so `con` can never find (or return) a point further than
+$$2N$$ from $$ C $$. But $$ n $$ can be any integer, in particular, $$ 2N $$, so
+then `con` would have to return a point further than $$ 2N $$ from the $$ C $$,
+a contradiction.
 
 Our only assumption was that such a construction `con` existed, so in fact that
 assumption must have been wrong -- there is no construction that computes the
@@ -170,8 +170,8 @@ more powerful.
 # Conclusion
 
 We began by building a case for considering the control-flow constructs
-available to a geometric computational system. We then describe a reasonable set
-of such constructs (sequencing and non-recursive functions) and then showed
+available to a geometric computational system. We then described a reasonable
+set of such constructs (sequencing and non-recursive functions) and then showed
 that given that set of control-flow constructs, a geometric computer with a
 compass does not allow for a generic function to be written which finds the
 intersection of any two lines, given as points $$ A, B $$ and $$ C, D $$. In
@@ -181,15 +181,16 @@ always as computationally powerful as a compass and straightedge together.
 # Credits and Future Work
 
 Jackson Warley and I figured out this argument together one weekend after
-Shīyuè Lǐ pointed me towards an algebraic treatment of geometric constructions
-the weekend before. Ironically, our final argument uses no algebraic machinery.
+Shīyuè Lǐ pointed me towards an algebraic treatment of geometric constructions.
+Ironically, our final argument uses no algebraic machinery. Sometimes you have
+to hold the sledgehammer in your hands to realize the fly-swatter will do.
 
 This argument considers the reduction in power produced by removing a
 straightedge from a geometric computational system when that system uses only
 sequencing and non-recursive functions as its control-flow structures. Geometric
-systems with other control-flow structures remain an open question: What happens
-if you give a finite state machine a compass?
+computational systems with other control-flow structures remain an open
+question: What happens if you give a finite state machine a compass?
 
-[construct-post]: /posts/2017-05-19-construct-mohr-mascheroni
+[construct-post]: /posts/construct-mohr-mascheroni/
 [ackermann]: https://en.wikipedia.org/wiki/Ackermann_function
 [prim-rec]: https://en.wikipedia.org/wiki/Primitive_recursive_function
