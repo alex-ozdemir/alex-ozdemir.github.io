@@ -6,7 +6,7 @@ date: 2017-09-25 23:26:40 -0500
 
 ---
 
-![A picture of me][portrait]
+![A picture of me](/images/portrait-photo.jpg){: .img-medium .align-center}
 
 I'm a future grad student looking to investigate computation as a medium for
 **machine instruction** and **human expression**. I have broad interests, love
@@ -26,7 +26,3 @@ Rust), and Coursera (building new feature for courses). I'm presently taking a
 gap year to teach at a high school in Windsor, Connecticut.
 
 In the Fall of 2018 I'll begin my Phd. in Computer Science at Stanford.
-
-
-[portrait]: /images/portrait-photo.jpg
-{: .align-center .img-medium}
