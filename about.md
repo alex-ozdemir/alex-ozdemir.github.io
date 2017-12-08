@@ -16,13 +16,13 @@ I graduated from Harvey Mudd in May 2017, where I studied Computer Science,
 Math, and Physics. While there I worked on projects in many areas, from
 computational biology, to data structures, to program analysis, to digital
 design, to the syntax of human language. I was also involved in a number of
-other ways: teaching my own class, interviewing prospective students, and
-serving as the Judiciary Chair of the Honor Board. I believe deeply in the
-institution and the ideals that it aspires to.
+other ways: teaching a class on [Rust](https://www.rust-lang.org), interviewing
+prospective students, and serving as the Judiciary Chair of the Honor Board. I
+believe deeply in the institution and the ideals that it aspires to.
 
 I spent my summers at J.P. Morgan (building automation tools), Facebook
 (protyping a 10GB/s data pipeline), Harvard (doing program analysis on unsafe
-Rust), and Coursera (building new feature for courses). I'm presently taking a
-gap year to teach at a high school in Windsor, Connecticut.
+Rust), and Coursera (building features for online degrees). I'm presently taking
+a gap year to teach at a high school in Windsor, Connecticut.
 
 In the Fall of 2018 I'll begin my Phd. in Computer Science at Stanford.
