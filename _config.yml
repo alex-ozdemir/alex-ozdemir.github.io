@@ -11,7 +11,7 @@ title                    : "..." # "Between Media"
 title_separator          : "-"
 name                     : "Alex Ozdemir"
 description              : "Thoughts on languages and algorithms"
-url                      : "" # "https://alex-ozdemir.github.io"
+url                      : "https://alex-ozdemir.github.io"
     # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 gh_repo                  :
@@ -128,6 +128,7 @@ plugins:
   - jekyll-gist
   - jekyll-feed
   - jemoji
+  - jekyll-seo-tag
 
 # mimic GitHub Pages with --safe
 whitelist:
