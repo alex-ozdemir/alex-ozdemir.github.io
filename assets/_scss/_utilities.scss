@@ -156,6 +156,12 @@ body:hover .visually-hidden button {
   margin-right: auto;
 }
 
+/* center div contents */
+.justify-center {
+  display: flex;
+  justify-content: center;
+}
+
 /* file page content container */
 
 .full {
