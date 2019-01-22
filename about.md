@@ -14,11 +14,11 @@ building computer systems, sometimes [simultaneously][cvc4]. I have broad
 interests, love learning, and love teaching.
 
 Before graduate school I taught computer science and math for a year at a
-[small boarding school][loomis] in Connecticut. I suspect I was too hard on my
-computer science students and not hard enough on my math students.
+[small boarding school][loomis] in Connecticut. I suspect that I was too hard on
+my computer science students and not hard enough on my math students.
 
 I did my undergrad at [Harvey Mudd][hmc], where I studied [Computer Science,
-Math, and Physics][ips]. I learned alot there, and I believe deeply in the
+Math, and Physics][ips]. I learned a lot there, and I believe deeply in the
 ideals that the school aspires to.
 
 I grew up in Sacramento, California.
